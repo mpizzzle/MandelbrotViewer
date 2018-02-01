@@ -2,11 +2,14 @@ package com.mpizzzle.mandelbrotviewer;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
 /**
@@ -15,12 +18,18 @@ import android.view.View;
 
 public class MandelbrotView extends View {
     private Complex[][] zValues;
-    private boolean[][] ignore;
-    private Paint black;
-    private Paint white;
+    private int[] colors;
     private int width;
     private int height;
+    private int loop;
+    private double zoom;
     private ObjectAnimator animator;
+    private Paint[] palette;
+    private Bitmap bmp;
+    private ScaleGestureDetector mScaleDetector;
+    private float mScaleFactor = 1.5f;
+
+
 
     public MandelbrotView(Context context) {
         super(context);
@@ -28,19 +37,43 @@ public class MandelbrotView extends View {
 
     public MandelbrotView(Context context, AttributeSet attrs) {
         super(context);
-        black = new Paint(Color.BLACK);
-        white = new Paint(Color.WHITE);
         width = 1080;
         height = 1920;
         zValues = new Complex[width][height];
-        ignore = new boolean[width][height];
+        colors = new int[width * height];
+        loop = 20;
+        palette = new Paint[loop];
+        zoom = 500d;
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+
+
+        for (int i = 0; i < loop; ++i)
+        {
+            palette[i] = new Paint();
+            palette[i].setARGB(255, ((i + 1) * (255 / loop)), 255 - ((i + 1) * (255 / loop)), 0);
+        }
+
+        palette[loop - 1].setColor(Color.BLACK);
 
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
                 zValues[i][j] = new Complex(0d, 0d);
-                ignore[i][j] = false;
+                colors[(i * width) + j] = Color.BLACK;
             }
         }
+
+        for (int k = 0; k < loop; ++k) {
+            for (int i = 0; i < width; ++i) {
+                for (int j = 0; j < height; ++j) {
+                    zFunction(zValues[i][j].getNatural(), zValues[i][j].getImaginary(), (j - (height / 2d)) / zoom, (i - (width / 2d)) / zoom, i, j);
+                    if (Math.sqrt(Math.pow(zValues[i][j].getNatural(), 2) + Math.pow(zValues[i][j].getImaginary(), 2)) <= 2) {
+                        colors[(i * width) + j] = palette[k].getColor();
+                    }
+                }
+            }
+        }
+
+        bmp = Bitmap.createBitmap (colors, width, height, Bitmap.Config.ARGB_8888);
     }
 
     @Override
@@ -50,25 +83,13 @@ public class MandelbrotView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawARGB(255, 0, 255, 0);
-        //for (int loop = 0; loop < 50; ++loop) {
-            for (int i = 0; i < width; ++i) {
-                for (int j = 0; j < height; ++j) {
-                    zFunction(zValues[i][j].getNatural(), zValues[i][j].getImaginary(), (i - (width / 2d)) / 200d, (j - (height / 2d)) / 200d, i, j);
-                    if (Math.sqrt(Math.pow(zValues[i][j].getNatural(), 2) + Math.pow(zValues[i][j].getImaginary(), 2)) <= 2) {
-                        canvas.drawPoint(i, j, black);
-                    }
-                }
-            }
-        //}
-
-        /*for (int i = 0; i < width; ++i) {
-            for (int j = 0; j < height; ++j) {
-                if (Math.sqrt(Math.pow(zValues[i][j].getNatural(), 2) + Math.pow(zValues[i][j].getImaginary(), 2)) <= 2) {
-                    canvas.drawPoint(i, j, black);
-                }
-            }
-        }*/
+        canvas.drawARGB(255, 0, 0, 0);
+        Matrix m = new Matrix();
+        m.postRotate(90);
+        m.postTranslate(width, 0);
+        canvas.drawBitmap(bmp, m, new Paint());
+        m.postTranslate(0, width);
+        canvas.drawBitmap(bmp, m, new Paint());
     }
 
     public void setNextStep(int value){
@@ -84,7 +105,9 @@ public class MandelbrotView extends View {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent ev) {
+        // Let the ScaleGestureDetector inspect all events.
+        mScaleDetector.onTouchEvent(ev);
         return true;
     }
 
@@ -93,10 +116,23 @@ public class MandelbrotView extends View {
         setMeasuredDimension(width, height);
     }
 
+
     public void zFunction(double zn, double zi, double cn, double ci, int x, int y) {
-        //double n = zn * zn - zi * zi + c.getNatural();
-        //double i = 2 * zn * zi + c.getImaginary();
         zValues[x][y].setNatural(zn * zn - zi * zi + cn);
         zValues[x][y].setImaginary(2 * zn * zi + ci);
+    }
+
+    private class ScaleListener
+            extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            mScaleFactor *= detector.getScaleFactor();
+
+            // Don't let the object get too small or too large.
+            mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+
+            invalidate();
+            return true;
+        }
     }
 }

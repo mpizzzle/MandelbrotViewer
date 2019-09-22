@@ -6,6 +6,12 @@ static const int window_w = 1920;
 static const int window_h = 1080;
 static const int steps_per_frame_normal = 3;
 
+static int iterations = 200;
+static float cam_x = 0;
+static float cam_y = 0;
+static float zoom = 0.2f;
+static float delta = 0.01f;
+
 int main(int argc, char *argv[]) {
   if (!sf::Shader::isAvailable()) {
       std::cout << "Your graphics card is bad";
@@ -18,13 +24,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  int iterations = 200;
-
-  float cam_x = 0;
-  float cam_y = 0;
-  float zoom = 0.2f;
-  float delta = 0.01f;
-
   sf::ContextSettings settings;
   settings.depthBits = 24;
   settings.stencilBits = 8;
@@ -32,11 +31,9 @@ int main(int argc, char *argv[]) {
   settings.majorVersion = 3;
   settings.minorVersion = 0;
 
-  //Create the window
-  //const sf::VideoMode screenSize = sf::VideoMode(window_w, window_h, 24);
   const sf::VideoMode screenSize = sf::VideoMode::getDesktopMode();
-  //sf::RenderWindow window(screenSize, "Mandelbrot", sf::Style::Resize | sf::Style::Close, settings);
   sf::RenderWindow window(screenSize, "Mandelbrot", sf::Style::Resize | sf::Style::Fullscreen, settings);
+
   window.setMouseCursorVisible(false);
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(true);
@@ -72,6 +69,8 @@ int main(int argc, char *argv[]) {
         cam_x += (1 / zoom) * delta;
         } else if (keycode == sf::Keyboard::I) {
         iterations += 1;
+        } else if (keycode == sf::Keyboard::O) {
+        iterations -= 1;
         }
       }
     }

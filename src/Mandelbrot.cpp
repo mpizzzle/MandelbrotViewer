@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 
   sf::Texture texture; texture.create(window_w, window_h);
   sf::Sprite sprite; sprite.setTexture(texture);
+  sprite.setScale(1.0, (float)((float)window_w / (float)window_h));
 
   while (window.isOpen()) {
     sf::Event event;

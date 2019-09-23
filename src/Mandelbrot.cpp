@@ -72,6 +72,11 @@ int main(int argc, char *argv[]) {
         iterations += 1;
         } else if (keycode == sf::Keyboard::O) {
         iterations -= 1;
+        } else if (keycode == sf::Keyboard::C) {
+        if (!shader.loadFromFile(frag_shader, sf::Shader::Fragment)) {
+          std::cout << "Failed to compile fragment shader!";
+          return 1;
+        }
         }
       }
     }

@@ -10,6 +10,7 @@ static int iterations = 200;
 static float cam_x = 0;
 static float cam_y = 0;
 static float zoom = 0.2f;
+static float fold = 20.0f;
 static float delta = 0.01f;
 
 int main(int argc, char *argv[]) {
@@ -72,6 +73,10 @@ int main(int argc, char *argv[]) {
         iterations += 1;
         } else if (keycode == sf::Keyboard::O) {
         iterations -= 1;
+        } else if (keycode == sf::Keyboard::F) {
+        fold += 1;
+        } else if (keycode == sf::Keyboard::D) {
+        fold -= 1;
         } else if (keycode == sf::Keyboard::C) {
         if (!shader.loadFromFile(frag_shader, sf::Shader::Fragment)) {
           std::cout << "Failed to compile fragment shader!";
@@ -85,6 +90,7 @@ int main(int argc, char *argv[]) {
     shader.setUniform("iterations", iterations);
     shader.setUniform("cam_x", cam_x);
     shader.setUniform("cam_y", cam_y);
+    shader.setUniform("fold", fold);
 
     window.clear();
     window.draw(sprite, &shader);

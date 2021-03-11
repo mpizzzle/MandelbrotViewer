@@ -12,6 +12,7 @@ static float cam_y = 0;
 static float zoom = 0.2f;
 static float fold = 20.0f;
 static float delta = 0.01f;
+static sf::Vector2<int> resolution(window_w, window_h);
 
 int main(int argc, char *argv[]) {
   if (!sf::Shader::isAvailable()) {
@@ -59,8 +60,13 @@ int main(int argc, char *argv[]) {
           break;
         } else if (keycode == sf::Keyboard::Z) {
         zoom += zoom*delta;
+        cam_x += ((1 / zoom) * delta) / 2.0;
+        cam_y += ((1 / zoom) * delta) / 4.0;
         } else if (keycode == sf::Keyboard::X) {
         zoom -= zoom*delta;
+        cam_x -= ((1 / zoom) * delta) / 2.0;
+        cam_y -= ((1 / zoom) * delta) / 4.0;
+
         } else if (keycode == sf::Keyboard::H) {
         cam_x -= (1 / zoom) * delta;
         } else if (keycode == sf::Keyboard::J) {
@@ -91,6 +97,7 @@ int main(int argc, char *argv[]) {
     shader.setUniform("cam_x", cam_x);
     shader.setUniform("cam_y", cam_y);
     shader.setUniform("fold", fold);
+    shader.setUniform("resolution", resolution);
 
     window.clear();
     window.draw(sprite, &shader);

@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 
-cd ~/MandelbrotViewer/
 rm -rf build/
 mkdir build
 cd build/ && cmake ..

@@ -22,7 +22,7 @@ void main() {
             gl_FragColor = vec4(0, 0, 0, 1);
         }
         else {
-            gl_FragColor = vec4(sin(mu / (3 * fold)), sin(mu / (5 * fold)), sin(mu / (7 * fold)), 1);
+            gl_FragColor = vec4((sin(mu * 7 * sin(fold)) / 4) + 0.5, (sin(mu * 3 * sin(fold)) / 4) + 0.5, (sin(mu * 5 * sin(fold)) / 4) + 0.5, 1);
             break;
         }
     }
